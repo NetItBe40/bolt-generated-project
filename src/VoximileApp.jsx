@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { Mic, Settings } from 'lucide-react';
+import RecordingModal from './components/RecordingModal';
 
 const VoximileApp = () => {
-  const [modalState, setModalState] = useState('CLOSED');
+  const [isRecordingModalOpen, setIsRecordingModalOpen] = useState(false);
   const [recordings, setRecordings] = useState([
     {
       id: 1,
@@ -27,7 +28,10 @@ const VoximileApp = () => {
       <main className="main-content">
         <div className="actions-container">
           <div className="action-button-container">
-            <button className="record-button">
+            <button 
+              className="record-button"
+              onClick={() => setIsRecordingModalOpen(true)}
+            >
               <Mic className="w-8 h-8" />
             </button>
             <span className="action-label">Enregistrer</span>
@@ -65,6 +69,11 @@ const VoximileApp = () => {
           </div>
         </section>
       </main>
+
+      <RecordingModal 
+        isOpen={isRecordingModalOpen}
+        onClose={() => setIsRecordingModalOpen(false)}
+      />
     </div>
   );
 };
