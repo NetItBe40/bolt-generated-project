@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Mic, X } from 'lucide-react';
+import WaveformVisualizer from './WaveformVisualizer';
 
 const RecordingModal = ({ isOpen, onClose }) => {
   const [time, setTime] = useState(0);
@@ -41,6 +42,9 @@ const RecordingModal = ({ isOpen, onClose }) => {
         </button>
         <h2>Enregistrement</h2>
         <div className="timer">{formatTime(time)}</div>
+        <div className="waveform-container">
+          <WaveformVisualizer isRecording={isRecording} />
+        </div>
         <button 
           className={`record-button ${isRecording ? 'recording' : ''}`}
           onClick={handleRecordingClick}
