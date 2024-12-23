@@ -63,7 +63,7 @@ const VoximileApp = () => {
         </div>
 
         <section className="recordings-section">
-          <h2>Enregistrements récents</h2>
+          <h2>Enregistrements récents 2</h2>
           <div className="recordings-list">
             {recordings.map(recording => (
               <div key={recording.id} className="recording-card">
