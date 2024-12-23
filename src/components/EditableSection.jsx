@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { Tag, Briefcase, User, Clock } from 'lucide-react';
+import { Edit2, Check, X, Plus } from 'lucide-react';
 
-const EditableSection = ({ title, icon: Icon, content, onEdit, type = 'text' }) => {
+const EditableSection = ({ icon: Icon, title, content, onEdit, type = 'text' }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState(content);
 
@@ -10,61 +10,48 @@ const EditableSection = ({ title, icon: Icon, content, onEdit, type = 'text' }) 
     setIsEditing(false);
   };
 
-  return (
-    <div className={`p-4 ${isEditing ? 'border-2 border-blue-300' : ''} rounded-lg`}>
-      <div className="flex justify-between items-center mb-2">
-        <h4 className="font-medium flex items-center">
-          <Icon className="w-4 h-4 mr-2" />
-          {title}
-        </h4>
-        {isEditing ? (
-          <div className="space-x-2">
-            <button onClick={handleSave} className="text-sm px-3 py-1 bg-blue-500 text-white rounded">
-              Sauvegarder
-            </button>
-            <button onClick={() => setIsEditing(false)} className="text-sm px-3 py-1 bg-gray-100 rounded">
-              Annuler
-            </button>
-          </div>
-        ) : (
-          <button onClick={() => setIsEditing(true)} className="text-sm px-3 py-1 bg-gray-100 rounded">
-            Modifier
-          </button>
-        )}
-      </div>
-      
-      {isEditing ? (
-        type === 'tags' ? (
-          <div className="space-y-2">
+  const handleCancel = () => {
+    setEditedContent(content);
+    setIsEditing(false);
+  };
+
+  const renderEditContent = () => {
+    switch (type) {
+      case 'tags':
+        return (
+          <div className="tags-editor">
             <input
               type="text"
-              className="w-full p-2 border rounded"
-              placeholder="Ajouter un tag (appuyez sur Entrée)"
+              className="tag-input"
+              placeholder="Ajouter un tag (Entrée pour valider)"
               onKeyDown={(e) => {
-                if (e.key === 'Enter' && e.target.value) {
-                  setEditedContent([...editedContent, e.target.value]);
+                if (e.key === 'Enter' && e.target.value.trim()) {
+                  setEditedContent([...editedContent, e.target.value.trim()]);
                   e.target.value = '';
                 }
               }}
             />
-            <div className="flex flex-wrap gap-2">
+            <div className="tags-list">
               {editedContent.map((tag, index) => (
-                <span key={index} className="px-2 py-1 bg-blue-100 rounded text-sm flex items-center">
+                <span key={index} className="tag">
                   {tag}
                   <button
                     onClick={() => setEditedContent(editedContent.filter((_, i) => i !== index))}
-                    className="ml-2 text-red-500"
+                    className="tag-remove"
                   >
-                    ×
+                    <X className="w-3 h-3" />
                   </button>
                 </span>
               ))}
             </div>
           </div>
-        ) : type === 'list' ? (
-          <div className="space-y-2">
+        );
+
+      case 'list':
+        return (
+          <div className="list-editor">
             {editedContent.map((item, index) => (
-              <div key={index} className="flex items-center gap-2">
+              <div key={index} className="list-item-editor">
                 <input
                   type="text"
                   value={item}
@@ -73,48 +60,98 @@ const EditableSection = ({ title, icon: Icon, content, onEdit, type = 'text' }) 
                     newContent[index] = e.target.value;
                     setEditedContent(newContent);
                   }}
-                  className="flex-1 p-2 border rounded"
+                  className="list-item-input"
                 />
                 <button
                   onClick={() => setEditedContent(editedContent.filter((_, i) => i !== index))}
-                  className="text-red-500"
+                  className="list-item-remove"
                 >
-                  ×
+                  <X className="w-4 h-4" />
                 </button>
               </div>
             ))}
             <button
               onClick={() => setEditedContent([...editedContent, ''])}
-              className="text-blue-500 text-sm"
+              className="add-item-button"
             >
-              + Ajouter
+              <Plus className="w-4 h-4" />
+              Ajouter
             </button>
           </div>
-        ) : (
+        );
+
+      case 'textarea':
+        return (
+          <textarea
+            value={editedContent}
+            onChange={(e) => setEditedContent(e.target.value)}
+            className="textarea-input"
+            rows={4}
+          />
+        );
+
+      default:
+        return (
           <input
             type="text"
             value={editedContent}
             onChange={(e) => setEditedContent(e.target.value)}
-            className="w-full p-2 border rounded"
+            className="text-input"
           />
-        )
-      ) : (
-        type === 'tags' ? (
-          <div className="flex flex-wrap gap-2">
-            {editedContent.map((tag, index) => (
-              <span key={index} className="px-2 py-1 bg-blue-100 rounded text-sm">{tag}</span>
+        );
+    }
+  };
+
+  const renderContent = () => {
+    switch (type) {
+      case 'tags':
+        return (
+          <div className="tags-list">
+            {content.map((tag, index) => (
+              <span key={index} className="tag">{tag}</span>
             ))}
           </div>
-        ) : type === 'list' ? (
-          <ul className="list-disc list-inside text-sm">
-            {editedContent.map((item, index) => (
+        );
+
+      case 'list':
+        return (
+          <ul className="content-list">
+            {content.map((item, index) => (
               <li key={index}>{item}</li>
             ))}
           </ul>
+        );
+
+      default:
+        return <p className="content-text">{content}</p>;
+    }
+  };
+
+  return (
+    <div className={`editable-section ${isEditing ? 'editing' : ''}`}>
+      <div className="section-header">
+        <div className="section-title">
+          <Icon className="w-5 h-5" />
+          <h3>{title}</h3>
+        </div>
+        {isEditing ? (
+          <div className="edit-actions">
+            <button onClick={handleSave} className="save-button">
+              <Check className="w-4 h-4" />
+            </button>
+            <button onClick={handleCancel} className="cancel-button">
+              <X className="w-4 h-4" />
+            </button>
+          </div>
         ) : (
-          <p className="text-sm">{editedContent}</p>
-        )
-      )}
+          <button onClick={() => setIsEditing(true)} className="edit-button">
+            <Edit2 className="w-4 h-4" />
+          </button>
+        )}
+      </div>
+      <div className="section-content">
+        {isEditing ? renderEditContent() : renderContent()}
+      </div>
     </div>
   );
 };

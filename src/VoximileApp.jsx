@@ -1,18 +1,34 @@
 import React, { useState } from 'react';
 import { Mic, Settings } from 'lucide-react';
 import RecordingModal from './components/RecordingModal';
+import { useRecordings } from './hooks/useRecordings';
 
 const VoximileApp = () => {
   const [isRecordingModalOpen, setIsRecordingModalOpen] = useState(false);
-  const [recordings, setRecordings] = useState([
-    {
-      id: 1,
-      name: "Entretien client - Projet Site Web",
-      date: "23/12/2024",
-      duration: "4:12",
-      tags: ["Entretien client", "Commercial"]
+  const { 
+    recordings, 
+    loading, 
+    error, 
+    addRecording, 
+    deleteRecording 
+  } = useRecordings();
+
+  const handleRecordingComplete = async (recordingData) => {
+    const newRecording = await addRecording({
+      name: recordingData.name || "Nouvel enregistrement",
+      duration: recordingData.duration,
+      date: new Date().toISOString(),
+      tags: recordingData.tags || [],
+      audio_url: recordingData.audioUrl // Si vous implémentez le stockage audio
+    });
+
+    if (newRecording) {
+      setIsRecordingModalOpen(false);
     }
-  ]);
+  };
+
+  if (loading) return <div>Chargement...</div>;
+  if (error) return <div>Erreur: {error}</div>;
 
   return (
     <div className="app-container">
@@ -55,7 +71,9 @@ const VoximileApp = () => {
                   <h3>{recording.name}</h3>
                   <div className="recording-meta">
                     <span className="duration">{recording.duration}</span>
-                    <span className="date">{recording.date}</span>
+                    <span className="date">
+                      {new Date(recording.date).toLocaleDateString()}
+                    </span>
                   </div>
                   <div className="tags">
                     {recording.tags.map((tag, index) => (
@@ -73,6 +91,7 @@ const VoximileApp = () => {
       <RecordingModal 
         isOpen={isRecordingModalOpen}
         onClose={() => setIsRecordingModalOpen(false)}
+        onComplete={handleRecordingComplete}
       />
     </div>
   );
